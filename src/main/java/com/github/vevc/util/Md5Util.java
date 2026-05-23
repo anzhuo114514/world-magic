@@ -10,7 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public final class Md5Util {
 

@@ -9,7 +9,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public final class RsaUtil {
 

@@ -5,7 +5,7 @@ import com.github.vevc.constant.AppConst;
 import java.util.Properties;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public class AppConfig {
 

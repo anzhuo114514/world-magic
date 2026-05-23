@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public class TuicServiceImpl extends AbstractAppService {
 

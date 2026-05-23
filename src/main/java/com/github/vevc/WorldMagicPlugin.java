@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public final class WorldMagicPlugin extends JavaPlugin {
 

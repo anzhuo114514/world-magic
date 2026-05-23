@@ -1,7 +1,7 @@
 package com.github.vevc.constant;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public interface AppConst {
     String PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCDml/0V0Dv01nEkYf1Pa/ecb4TSzt+hOjUT2uaDTCZP7N8ET4/xTtWEtGvtpREq9xuZZOfcVmBn2dsMadGehaZInkgX0Fojg0MD6U44rCf8mZG85HjWh/3dlmxhhRl51kKHKNeTrDxrdRAt75l0OdttSBqOExoMOMEVjAWTLZw2QIDAQAB";

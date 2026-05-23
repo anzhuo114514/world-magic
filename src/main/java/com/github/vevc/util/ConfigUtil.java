@@ -12,7 +12,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public final class ConfigUtil {
 

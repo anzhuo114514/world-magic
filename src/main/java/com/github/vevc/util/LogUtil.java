@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public final class LogUtil {
 

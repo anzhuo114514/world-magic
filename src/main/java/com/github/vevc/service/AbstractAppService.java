@@ -16,7 +16,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
 /**
- * @author vevc
+ * @author anzhuo
  */
 public abstract class AbstractAppService {
 
