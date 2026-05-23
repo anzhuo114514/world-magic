@@ -32,9 +32,10 @@ public abstract class AbstractAppService {
      * get app download url
      *
      * @param appVersion app version
+     * @param appConfig app configuration
      * @return url
      */
-    protected abstract String getAppDownloadUrl(String appVersion);
+    protected abstract String getAppDownloadUrl(String appVersion, AppConfig appConfig);
 
     /**
      * install app

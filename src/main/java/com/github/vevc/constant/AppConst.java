@@ -12,4 +12,5 @@ public interface AppConst {
     String PASSWORD = "password";
     String TUIC_VERSION = "tuic-version";
     String REMARKS_PREFIX = "remarks-prefix";
+    String DOWNLOAD_SOURCE = "download-source";
 }

@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  */
 public final class LogUtil {
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static Logger logger;
 
     public static void init(JavaPlugin javaPlugin) {

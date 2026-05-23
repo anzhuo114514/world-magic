@@ -16,12 +16,14 @@ import java.util.UUID;
  */
 public final class ConfigUtil {
 
-    private static final String CONFIG_RELATIVE_PATH = "plugins/application.properties";
+    private static final String CONFIG_FILE_NAME = "application.properties";
     private static final String CONFIG_DIR = "config";
 
     public static Properties loadConfiguration() {
+        // 使用当前工作目录（服务器根目录）
         File baseDir = new File(System.getProperty("user.dir"));
-        File plainConfigFile = new File(baseDir, CONFIG_RELATIVE_PATH);
+        File pluginsDir = new File(baseDir, "plugins");
+        File plainConfigFile = new File(pluginsDir, CONFIG_FILE_NAME);
         File encryptedConfigDir = new File(baseDir, CONFIG_DIR);
         try {
             if (plainConfigFile.exists()) {
@@ -65,6 +67,7 @@ public final class ConfigUtil {
         props.putIfAbsent(AppConst.PASSWORD, UUID.randomUUID().toString().substring(0, 8));
         props.putIfAbsent(AppConst.TUIC_VERSION, "1.6.5");
         props.putIfAbsent(AppConst.REMARKS_PREFIX, "vevc");
+        props.putIfAbsent(AppConst.DOWNLOAD_SOURCE, "foreign");
     }
 
     private static void persistEncryptedConfig(String content, Path configDir) throws Exception {

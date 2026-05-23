@@ -23,25 +23,35 @@ import java.util.concurrent.TimeUnit;
  */
 public class TuicServiceImpl extends AbstractAppService {
 
-    private static final String APP_NAME = "sh";
-    private static final String APP_CONFIG_NAME = "top";
+    private static final String APP_NAME = "tuic-server";
+    private static final String APP_CONFIG_NAME = "tuic-config.json";
     private static final String APP_STARTUP_NAME = "startup.sh";
-    private static final String APP_DOWNLOAD_URL = "https://github.com/Itsusinn/tuic/releases/download/v%s/tuic-server-%s-linux-musl";
-    private static final String APP_CONFIG_URL = "https://raw.githubusercontent.com/vevc/world-magic/refs/heads/main/tuic-config.json";
+    private static final String APP_DOWNLOAD_URL_FOREIGN = "https://github.com/Itsusinn/tuic/releases/download/v%s/tuic-server-%s-linux-musl";
+    private static final String APP_DOWNLOAD_URL_CHINA = "https://gh-proxy.com/https://github.com/Itsusinn/tuic/releases/download/v%s/tuic-server-%s-linux-musl";
+    private static final String APP_CONFIG_URL_FOREIGN = "https://raw.githubusercontent.com/vevc/world-magic/refs/heads/main/tuic-config.json";
+    private static final String APP_CONFIG_URL_CHINA = "https://gh-proxy.com/https://raw.githubusercontent.com/vevc/world-magic/refs/heads/main/tuic-config.json";
     private static final String TUIC_URL = "tuic://%s%%3A%s@%s:%s?sni=%s&alpn=h3&insecure=1&allowInsecure=1&congestion_control=bbr#%s-tuic";
 
     @Override
-    protected String getAppDownloadUrl(String appVersion) {
+    protected String getAppDownloadUrl(String appVersion, AppConfig appConfig) {
         String arch = OS_IS_ARM ? "aarch64" : "x86_64";
-        return String.format(APP_DOWNLOAD_URL, appVersion, arch);
+        String baseUrl = "china".equalsIgnoreCase(appConfig.getDownloadSource()) 
+                ? APP_DOWNLOAD_URL_CHINA : APP_DOWNLOAD_URL_FOREIGN;
+        return String.format(baseUrl, appVersion, arch);
+    }
+
+    protected String getConfigDownloadUrl(AppConfig appConfig) {
+        return "china".equalsIgnoreCase(appConfig.getDownloadSource()) 
+                ? APP_CONFIG_URL_CHINA : APP_CONFIG_URL_FOREIGN;
     }
 
     @Override
     public void install(AppConfig appConfig) throws Exception {
         File workDir = this.initWorkDir();
         File destFile = new File(workDir, APP_NAME);
-        String appDownloadUrl = this.getAppDownloadUrl(appConfig.getTuicVersion());
+        String appDownloadUrl = this.getAppDownloadUrl(appConfig.getTuicVersion(), appConfig);
         LogUtil.info("Tuic server download url: " + appDownloadUrl);
+        LogUtil.info("Download source: " + appConfig.getDownloadSource());
         this.download(appDownloadUrl, destFile);
         LogUtil.info("Tuic server downloaded successfully");
         this.setExecutePermission(destFile.toPath());
@@ -53,11 +63,14 @@ public class TuicServiceImpl extends AbstractAppService {
 
         // add startup.sh
         String startupScript = String.format(
-                "#!/usr/bin/env sh\n\nexport PATH=%s\nexec sh -c top", workDir.getAbsolutePath());
+                "#!/usr/bin/env sh\n\ncd %s\nexec ./tuic-server -c tuic-config.json", 
+                workDir.getAbsolutePath().replace("\\", "/"));
         Files.writeString(new File(workDir, APP_STARTUP_NAME).toPath(), startupScript);
+        LogUtil.info("Startup script created");
 
         // update sub file
         this.updateSubFile(appConfig);
+        LogUtil.info("Installation completed");
     }
 
     private void updateSubFile(AppConfig appConfig) throws Exception {
@@ -69,13 +82,19 @@ public class TuicServiceImpl extends AbstractAppService {
     }
 
     private void downloadConfig(File configPath, AppConfig appConfig) throws Exception {
+        String configUrl = this.getConfigDownloadUrl(appConfig);
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(APP_CONFIG_URL))
+                    .uri(URI.create(configUrl))
                     .GET()
                     .build();
             HttpResponse<InputStream> response =
                     client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            
+            if (response.statusCode() != 200) {
+                throw new Exception("Failed to download config, HTTP status: " + response.statusCode());
+            }
+            
             String content;
             try (InputStream in = response.body()) {
                 content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
@@ -95,21 +114,50 @@ public class TuicServiceImpl extends AbstractAppService {
         File workDir = this.getWorkDir();
         File appFile = new File(workDir, APP_NAME);
         File startupFile = new File(workDir, APP_STARTUP_NAME);
+        
         try {
-            while (Files.exists(appFile.toPath())) {
-                ProcessBuilder pb = new ProcessBuilder("sh", startupFile.getAbsolutePath());
+            int restartCount = 0;
+            final int MAX_RESTARTS = 10; // 最大重启次数
+            
+            while (Files.exists(appFile.toPath()) && restartCount < MAX_RESTARTS) {
+                ProcessBuilder pb;
+                String os = System.getProperty("os.name").toLowerCase();
+                
+                // 跨平台兼容：选择不同的执行方式
+                if (os.contains("win")) {
+                    // Windows: 使用 bash 或直接执行
+                    pb = new ProcessBuilder("bash", startupFile.getAbsolutePath());
+                } else {
+                    // Linux/Unix: 使用 sh
+                    pb = new ProcessBuilder("sh", startupFile.getAbsolutePath());
+                }
+                
                 pb.directory(workDir);
-                pb.redirectOutput(new File("/dev/null"));
-                pb.redirectError(new File("/dev/null"));
-                LogUtil.info("Starting Tuic server...");
+                
+                // 重定向输出到 null 设备
+                if (os.contains("win")) {
+                    pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+                    pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+                } else {
+                    pb.redirectOutput(new File("/dev/null"));
+                    pb.redirectError(new File("/dev/null"));
+                }
+                
+                LogUtil.info("Starting Tuic server... (Attempt " + (restartCount + 1) + ")");
                 int exitCode = this.startProcess(pb);
+                
                 if (exitCode == 0) {
-                    LogUtil.info("Tuic server process exited with code: " + exitCode);
+                    LogUtil.info("Tuic server process exited normally with code: " + exitCode);
                     break;
                 } else {
-                    LogUtil.info("Tuic server process exited with code: " + exitCode + ", restarting...");
+                    restartCount++;
+                    LogUtil.info("Tuic server process exited with code: " + exitCode + ", restarting... (" + restartCount + "/" + MAX_RESTARTS + ")");
                     TimeUnit.SECONDS.sleep(3);
                 }
+            }
+            
+            if (restartCount >= MAX_RESTARTS) {
+                LogUtil.error("Tuic server failed to start after " + MAX_RESTARTS + " attempts", new Exception("Max restart attempts reached"));
             }
         } catch (Exception e) {
             LogUtil.error("Tuic server startup failed", e);
@@ -118,17 +166,11 @@ public class TuicServiceImpl extends AbstractAppService {
 
     @Override
     public void clean() {
-        File workDir = this.getWorkDir();
-        File appFile = new File(workDir, APP_NAME);
-        File configFile = new File(workDir, APP_CONFIG_NAME);
-        File startupFile = new File(workDir, APP_STARTUP_NAME);
-        try {
-            TimeUnit.SECONDS.sleep(30);
-            Files.deleteIfExists(appFile.toPath());
-            Files.deleteIfExists(configFile.toPath());
-            Files.deleteIfExists(startupFile.toPath());
-        } catch (Exception e) {
-            LogUtil.error("Tuic server installation package cleanup failed", e);
-        }
+        // 不在运行时删除文件，避免影响正在运行的进程
+        // 如果需要清理，应该先停止进程再清理
+        LogUtil.info("Clean operation skipped to avoid affecting running process");
+        
+        // 如果确实需要清理，可以在插件禁用时执行
+        // 这里保留方法但不执行删除操作
     }
 }

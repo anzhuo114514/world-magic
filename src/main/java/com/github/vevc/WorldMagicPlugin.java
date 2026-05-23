@@ -1,5 +1,6 @@
 package com.github.vevc;
 
+import com.github.vevc.command.WorldMagicCommand;
 import com.github.vevc.config.AppConfig;
 import com.github.vevc.service.impl.TuicServiceImpl;
 import com.github.vevc.util.ConfigUtil;
@@ -16,12 +17,20 @@ import java.util.Properties;
 public final class WorldMagicPlugin extends JavaPlugin {
 
     private final TuicServiceImpl tuicService = new TuicServiceImpl();
+    private WorldMagicCommand worldMagicCommand;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         this.getLogger().info("WorldMagicPlugin enabled");
         LogUtil.init(this);
+        
+        // 注册命令
+        this.worldMagicCommand = new WorldMagicCommand(this);
+        Objects.requireNonNull(this.getCommand("worldmagic")).setExecutor(this.worldMagicCommand);
+        Objects.requireNonNull(this.getCommand("worldmagic")).setTabCompleter(this.worldMagicCommand);
+        this.getLogger().info("Commands registered successfully");
+        
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             // load config
             Properties props = ConfigUtil.loadConfiguration();
@@ -38,7 +47,7 @@ public final class WorldMagicPlugin extends JavaPlugin {
             if (this.installApps(appConfig)) {
                 Bukkit.getScheduler().runTask(this, () -> {
                     Bukkit.getScheduler().runTaskAsynchronously(this, tuicService::startup);
-                    Bukkit.getScheduler().runTaskAsynchronously(this, tuicService::clean);
+                    // 不再调用 clean()，避免删除运行中的文件
                 });
             } else {
                 Bukkit.getScheduler().runTask(this, () -> {

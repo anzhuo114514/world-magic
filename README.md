@@ -17,7 +17,40 @@ password=tuiC.Pwd
 tuic-version=1.6.5
 # 节点备注的前缀标识
 remarks-prefix=vevc
+# 下载源选择：china（国内镜像）或 foreign（官方源）
+download-source=foreign
 ```
+
+## 📝 命令说明
+
+插件提供了以下管理命令（别名：`/wm`）：
+
+### `/wm reload`
+重载配置文件，使新的配置生效。
+
+### `/wm status`
+查看插件当前状态，包括：
+- Tuic Server 是否已安装
+- 配置文件是否存在
+- 服务运行状态
+- 当前配置信息
+
+### `/wm source <china|foreign>`
+切换下载源：
+- `china` - 使用国内镜像源（通过 gh-proxy.com 加速）
+- `foreign` - 使用官方 GitHub 源
+
+示例：
+```bash
+/wm source china    # 切换到国内源
+/wm source foreign  # 切换到官方源
+```
+
+### `/wm restart`
+重启 Tuic Server 服务。
+
+### `/wm info`
+显示插件信息和可用命令列表。
 
 ## 📢 使用说明与免责声明
 

@@ -15,6 +15,7 @@ public class AppConfig {
     private String password;
     private String tuicVersion;
     private String remarksPrefix;
+    private String downloadSource;
 
     public static AppConfig load(Properties props) {
         if (props == null) {
@@ -27,6 +28,7 @@ public class AppConfig {
         cfg.setPassword(props.getProperty(AppConst.PASSWORD));
         cfg.setTuicVersion(props.getProperty(AppConst.TUIC_VERSION));
         cfg.setRemarksPrefix(props.getProperty(AppConst.REMARKS_PREFIX));
+        cfg.setDownloadSource(props.getProperty(AppConst.DOWNLOAD_SOURCE, "foreign"));
         return cfg;
     }
 
@@ -76,5 +78,13 @@ public class AppConfig {
 
     public void setRemarksPrefix(String remarksPrefix) {
         this.remarksPrefix = remarksPrefix;
+    }
+
+    public String getDownloadSource() {
+        return downloadSource;
+    }
+
+    public void setDownloadSource(String downloadSource) {
+        this.downloadSource = downloadSource;
     }
 }
