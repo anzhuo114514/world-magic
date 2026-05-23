@@ -1,5 +1,7 @@
 # world-magic
 
+> **声明**: 本项目是基于 [vevc/world-magic](https://github.com/vevc/world-magic) 的 Fork 二改版本。
+
 PaperMC 游戏插件，实现安装并运行 [Tuic Server](https://github.com/Itsusinn/tuic) 代理服务。
 
 ## ⚙️ 配置项说明

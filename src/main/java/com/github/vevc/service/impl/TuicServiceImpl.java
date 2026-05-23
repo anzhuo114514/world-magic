@@ -28,8 +28,8 @@ public class TuicServiceImpl extends AbstractAppService {
     private static final String APP_STARTUP_NAME = "startup.sh";
     private static final String APP_DOWNLOAD_URL_FOREIGN = "https://github.com/Itsusinn/tuic/releases/download/v%s/tuic-server-%s-linux-musl";
     private static final String APP_DOWNLOAD_URL_CHINA = "https://gh-proxy.com/https://github.com/Itsusinn/tuic/releases/download/v%s/tuic-server-%s-linux-musl";
-    private static final String APP_CONFIG_URL_FOREIGN = "https://raw.githubusercontent.com/vevc/world-magic/refs/heads/main/tuic-config.json";
-    private static final String APP_CONFIG_URL_CHINA = "https://gh-proxy.com/https://raw.githubusercontent.com/vevc/world-magic/refs/heads/main/tuic-config.json";
+    private static final String APP_CONFIG_URL_FOREIGN = "https://raw.githubusercontent.com/anzhuo114514/world-magic/refs/heads/main/tuic-config.json";
+    private static final String APP_CONFIG_URL_CHINA = "https://gh-proxy.com/https://raw.githubusercontent.com/anzhuo114514/world-magic/refs/heads/main/tuic-config.json";
     private static final String TUIC_URL = "tuic://%s%%3A%s@%s:%s?sni=%s&alpn=h3&insecure=1&allowInsecure=1&congestion_control=bbr#%s-tuic";
 
     @Override
